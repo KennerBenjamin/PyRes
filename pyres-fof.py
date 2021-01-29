@@ -60,6 +60,9 @@ Options:
  -B
 --btree
 
+ -M
+--minheap
+
 A reasonable command line to run the prover would be:
 
   ./pyres-fof.py -tifb -HPickGiven5 -nlargest EXAMPLES/PUZ001+1.p
@@ -158,6 +161,8 @@ def processOptions(opts):
             if int(optarg) < 3:
                 raise KeyError("BTree degree:", optarg, ". Only supports degrees >= 3")
             params.btree = int(optarg)
+        elif opt == "-M" or opt == "--minheap":
+            params.minheap = True
 
     return params
 
@@ -194,7 +199,7 @@ if __name__ == '__main__':
 
     try:
         opts, args = getopt.gnu_getopt(sys.argv[1:],
-                                       "hsVpitfbH:n:SB:",
+                                       "hsVpitfbH:n:SB:M",
                                        ["help",
                                         "silent",
                                         "version",
@@ -206,7 +211,8 @@ if __name__ == '__main__':
                                         "given-clause-heuristic=",
                                         "neg-lit-selection="
                                         "supress-eq-axioms",
-                                        "btree="])
+                                        "btree=",
+                                        "minheap"])
     except getopt.GetoptError as err:
         print(sys.argv[0], ":", err)
         sys.exit(1)

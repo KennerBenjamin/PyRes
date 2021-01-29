@@ -46,7 +46,7 @@ Email: schulz@eprover.org
 import unittest
 from idents import Ident
 from lexer import Token, Lexer
-from clausesets import ClauseSet, HeuristicClauseSet, IndexedClauseSet, BTreeClauseSet
+from clausesets import ClauseSet, HeuristicClauseSet, IndexedClauseSet, BTreeClauseSet, MinHeapClauseSet
 import heuristics
 from rescontrol import computeAllResolvents, computeAllFactors
 from subsumption import forwardSubsumption, backwardSubsumption
@@ -64,7 +64,8 @@ class SearchParams(object):
                  forward_subsumption=False,
                  backward_subsumption=False,
                  literal_selection=None,
-                 btree=0):
+                 btree=0,
+                 minheap=False):
         """
         Initialize heuristic parameters.
         """
@@ -100,6 +101,7 @@ class SearchParams(object):
         """
         TODO
         """
+        self.minheap = minheap
 
 
 class ProofState(object):
@@ -124,9 +126,10 @@ class ProofState(object):
         self.params = params
         if params.btree >= 3:
             self.unprocessed = BTreeClauseSet(params.heuristics, params.btree)
+        elif params.minheap:
+            self.unprocessed = MinHeapClauseSet(params.heuristics)
         else:
             self.unprocessed = HeuristicClauseSet(params.heuristics)
-
         if indexed:
             self.processed = IndexedClauseSet()
         else:

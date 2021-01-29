@@ -284,6 +284,98 @@ class BTreeClauseSet(ClauseSet):
     def getSubsumedCandidates(self, queryclause):
         return [clause for clause in self.clauseDeleted if clause is not True]
 
+class MinHeapClauseSet(ClauseSet):
+    """
+    MinHeap Interface
+    TODO: Implement MinHeap
+    """
+
+    def __init__(self, eval_functions):
+        """
+        Initialize the MinHeap and the evaluation functions.
+        """
+        self.degree = 5
+        self.trees = []
+        self.clauses = []
+        self.clauseDeleted = []
+        self.eval_functions = eval_functions
+        self.counter = 0
+        for i in range(0, len(eval_functions.eval_descriptor)):
+            self.trees.append(BTree(self.degree))
+
+    def __repr__(self):
+        leftclauses = [clause for clause in self.clauseDeleted if clause is not True]
+        return "\n".join([repr(clause) for clause in leftclauses])
+
+    def __len__(self):
+        return sum(1 for clause in self.clauseDeleted if clause is not True)
+
+    def addClause(self, clause):
+        """
+        Add a clause to the MinHeaps.
+        """
+        self.clauseDeleted.append(clause)
+        evals = self.eval_functions.evaluate(clause)
+        clause.addEval(evals)
+        for index, tree in enumerate(self.trees):
+            tree.insert(clause, self.counter, evals[index])
+        self.counter += 1
+
+    def extractBestByEval(self, heuristic_index):
+        """
+        Extract and return the clause with the lowest weight according
+        to the selected heuristic. If the set is empty, return None.
+        """
+
+        while True:
+            clause, clause_id, empty = self.trees[heuristic_index].getBest()
+            if empty:
+                return None
+            if self.clauseDeleted[clause_id] is not True:
+                self.clauseDeleted[clause_id] = True
+                break
+        return clause
+
+    def extractBest(self):
+        """
+        Extract and return the next "best" clause according to the
+        evaluation scheme.
+        """
+        return self.extractBestByEval(self.eval_functions.nextEval())
+
+    def extractClause(self, clause):
+        self.clauseDeleted[self.clauseDeleted.index(clause)] = True
+        return clause
+
+    def extractFirst(self):
+        for i, clause in enumerate(self.clauseDeleted):
+            if clause is not True:
+                self.clauseDeleted[i] = True
+                return clause
+        return None
+
+    def collectSig(self, sig=None):
+        if not sig:
+            sig = Signature()
+
+        leftclauses = [clause for clause in self.clauseDeleted if clause is not True]
+
+        for i in leftclauses:
+            i.collectSig(sig)
+        return sig
+
+    def getResolutionLiterals(self, lit):
+        leftclauses = [clause for clause in self.clauseDeleted if clause is not True]
+        res = [(c, i) for c in leftclauses for i in range(len(c)) if
+               c.getLiteral(i).isInferenceLit()]
+        return res
+
+    def getSubsumingCandidates(self, queryclause):
+        return [clause for clause in self.clauseDeleted if clause is not True]
+
+    def getSubsumedCandidates(self, queryclause):
+        return [clause for clause in self.clauseDeleted if clause is not True]
+
 
 class IndexedClauseSet(ClauseSet):
     """
