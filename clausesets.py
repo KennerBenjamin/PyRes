@@ -41,6 +41,7 @@ from clauses import Clause, parseClause
 from heuristics import PickGiven2
 from indexing import ResolutionIndex, SubsumptionIndex
 from btree import BTree
+from minheap import MinHeap
 
 
 class ClauseSet(object):
@@ -204,7 +205,6 @@ class BTreeClauseSet(ClauseSet):
         Initialize the Btree and the evaluation functions.
         """
         self.trees = []
-        self.clauses = []
         self.clauseDeleted = []
         self.eval_functions = eval_functions
         self.counter = 0
@@ -287,21 +287,18 @@ class BTreeClauseSet(ClauseSet):
 class MinHeapClauseSet(ClauseSet):
     """
     MinHeap Interface
-    TODO: Implement MinHeap
     """
-
     def __init__(self, eval_functions):
         """
         Initialize the MinHeap and the evaluation functions.
         """
-        self.degree = 5
         self.trees = []
-        self.clauses = []
+        self.heaps = []
         self.clauseDeleted = []
         self.eval_functions = eval_functions
         self.counter = 0
         for i in range(0, len(eval_functions.eval_descriptor)):
-            self.trees.append(BTree(self.degree))
+            self.trees.append(MinHeap())
 
     def __repr__(self):
         leftclauses = [clause for clause in self.clauseDeleted if clause is not True]
